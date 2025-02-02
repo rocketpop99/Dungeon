@@ -3,22 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <title>Top-Down Dungeon Crawler</title>
+  <!-- 1. Responsive viewport meta tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Basic styling for full-page canvas */
+    /* Basic styling */
     body {
       margin: 0;
       background: #000;
       overflow: hidden;
     }
+    /* 2. Responsive canvas */
     canvas {
       display: block;
       margin: 0 auto;
       background: #333;
+      /* The actual drawing resolution stays 640x480, but this scales the canvas */
+      width: 100%;
+      max-width: 640px;
+      height: auto;
+    }
+    /* 3. Mobile on-screen controls styling */
+    #mobile-controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+    #mobile-controls button {
+      font-size: 24px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #000;
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="640" height="480"></canvas>
+  
+  <!-- 3. Mobile on-screen controls -->
+  <div id="mobile-controls">
+    <button data-direction="up">↑</button>
+    <button data-direction="left">←</button>
+    <button data-direction="down">↓</button>
+    <button data-direction="right">→</button>
+  </div>
+
   <script>
     // --- Dungeon Data ---
     // 0 = floor, 1 = wall. A simple dungeon layout.
@@ -42,7 +75,6 @@
     const rows = dungeon.length;
     const cols = dungeon[0].length;
 
-    // --- Setup Canvas ---
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -75,11 +107,10 @@
       drawPlayer();
     }
 
-    // --- Input Handling ---
+    // --- Input Handling (Keyboard) ---
     document.addEventListener("keydown", function(e) {
       let newX = player.x;
       let newY = player.y;
-
       switch (e.key) {
         case "ArrowUp":
           newY--;
@@ -96,13 +127,40 @@
         default:
           return; // Ignore other keys.
       }
-
       // Check bounds and ensure we don’t walk into walls.
       if (newY >= 0 && newY < rows && newX >= 0 && newX < cols && dungeon[newY][newX] === 0) {
         player.x = newX;
         player.y = newY;
       }
       draw();
+    });
+
+    // --- Input Handling (Mobile Controls) ---
+    document.querySelectorAll('#mobile-controls button').forEach(button => {
+      button.addEventListener('click', () => {
+        let newX = player.x;
+        let newY = player.y;
+        const direction = button.getAttribute('data-direction');
+        switch (direction) {
+          case 'up':
+            newY--;
+            break;
+          case 'down':
+            newY++;
+            break;
+          case 'left':
+            newX--;
+            break;
+          case 'right':
+            newX++;
+            break;
+        }
+        if (newY >= 0 && newY < rows && newX >= 0 && newX < cols && dungeon[newY][newX] === 0) {
+          player.x = newX;
+          player.y = newY;
+        }
+        draw();
+      });
     });
 
     // --- Initial Render ---
