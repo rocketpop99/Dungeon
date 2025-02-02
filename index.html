@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Top-Down Dungeon Crawler</title>
+  <style>
+    /* Basic styling for full-page canvas */
+    body {
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <script>
+    // --- Dungeon Data ---
+    // 0 = floor, 1 = wall. A simple dungeon layout.
+    const dungeon = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+      [1,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
+      [1,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+      [1,0,1,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1,0,1],
+      [1,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,1],
+      [1,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1,0,1,0,1],
+      [1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1],
+      [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
+      [1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+      [1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    const tileSize = 32;  // Each tile is 32 pixels
+    const rows = dungeon.length;
+    const cols = dungeon[0].length;
+
+    // --- Setup Canvas ---
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // --- Player Object ---
+    const player = {
+      x: 1, // starting grid column
+      y: 1, // starting grid row
+      color: "blue"
+    };
+
+    // --- Drawing Functions ---
+    function drawDungeon() {
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          // Draw walls and floors
+          ctx.fillStyle = dungeon[row][col] === 1 ? "#555" : "#222";
+          ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
+        }
+      }
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawDungeon();
+      drawPlayer();
+    }
+
+    // --- Input Handling ---
+    document.addEventListener("keydown", function(e) {
+      let newX = player.x;
+      let newY = player.y;
+
+      switch (e.key) {
+        case "ArrowUp":
+          newY--;
+          break;
+        case "ArrowDown":
+          newY++;
+          break;
+        case "ArrowLeft":
+          newX--;
+          break;
+        case "ArrowRight":
+          newX++;
+          break;
+        default:
+          return; // Ignore other keys.
+      }
+
+      // Check bounds and ensure we don’t walk into walls.
+      if (newY >= 0 && newY < rows && newX >= 0 && newX < cols && dungeon[newY][newX] === 0) {
+        player.x = newX;
+        player.y = newY;
+      }
+      draw();
+    });
+
+    // --- Initial Render ---
+    draw();
+  </script>
+</body>
+</html>
